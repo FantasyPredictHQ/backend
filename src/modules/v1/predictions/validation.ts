@@ -36,6 +36,21 @@ export const competitionLeaderboardSchema = z
     })
     .strict()
 
+export const fetchAllSchema = z
+    .object({
+        page: z.string().optional(),
+        limit: z.string().optional(),
+        user: z.string().optional(),
+        match: z.string().optional(),
+        pool: z.string().optional(),
+        competition: z.string().optional(),
+        status: z.enum(["pending", "completed"]).optional(),
+        outcome: z.string().optional(),
+        fromDate: z.string().optional(),
+        toDate: z.string().optional(),
+    })
+    .strict()
+
 export const sendMailSchema = z
     .object({
         matchday: z.string({ required_error: "Enter Matchday" }).nonempty(),

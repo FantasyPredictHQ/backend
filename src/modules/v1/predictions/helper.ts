@@ -1,8 +1,32 @@
 /** @format */
 
 import { endOfDay, startOfDay } from "date-fns"
-import { Types } from "mongoose"
+import { Request } from "express"
+import { FilterQuery, Types } from "mongoose"
 import { IPrediction } from "../../../types";
+
+export const composeFilter = (req: Request) => {
+    const { user, match, pool, competition, status, outcome, fromDate, toDate } =
+        req.query
+    let filter: FilterQuery<IPrediction> = {}
+
+    if (user) filter = { ...filter, user }
+    if (match) filter = { ...filter, match }
+    if (pool) filter = { ...filter, pool }
+    if (competition) filter = { ...filter, competition }
+    if (status) filter = { ...filter, status }
+    if (outcome) filter = { ...filter, outcome }
+    if (fromDate || toDate)
+        filter = {
+            ...filter,
+            createdAt: {
+                ...(fromDate && { $gte: startOfDay(new Date(fromDate as string)) }),
+                ...(toDate && { $lte: endOfDay(new Date(toDate as string)) }),
+            },
+        }
+
+    return filter
+}
 
 export const leaderboardPipeline = (
     competition: string,

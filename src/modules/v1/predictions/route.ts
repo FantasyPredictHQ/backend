@@ -2,9 +2,9 @@
 
 import { Router } from "express"
 
-import { applicationInReview, competitionLeaderboard, create, leaderboard, sendPredictionMail } from "./controller"
+import { applicationInReview, competitionLeaderboard, create, fetchAll, leaderboard, sendPredictionMail } from "./controller"
 import { validator } from "../../common/utils"
-import { competitionLeaderboardSchema, createSchema, inReviewSchema, leaderboardSchema, sendMailSchema } from "./validation"
+import { competitionLeaderboardSchema, createSchema, fetchAllSchema, inReviewSchema, leaderboardSchema, sendMailSchema } from "./validation"
 import { validateCreate } from "./middleware"
 
 const predictionRouter = Router({
@@ -15,6 +15,7 @@ const predictionRouter = Router({
 predictionRouter.post("/", validator.body(createSchema), validateCreate, create)
 
 predictionRouter.get("/", validator.query(leaderboardSchema), leaderboard);
+predictionRouter.get("/admin", validator.query(fetchAllSchema), fetchAll);
 predictionRouter.post("/send-mail", validator.body(sendMailSchema), sendPredictionMail);
 predictionRouter.get("/comp-leaderboard", validator.query(competitionLeaderboardSchema), competitionLeaderboard);
 predictionRouter.get("/in-review", validator.query(inReviewSchema), applicationInReview);

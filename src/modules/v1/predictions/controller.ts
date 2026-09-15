@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express"
 import { catchError, success, tryPromise } from "../../common/utils"
 import PredictionService from "./service"
 import MatchService from "../matches/service"
-import { leaderboardPipeline } from "./helper"
+import { composeFilter, leaderboardPipeline } from "./helper"
 import UserService from "../users/service"
 import PoolMemberService from "../members/service"
 import { isAfter } from "date-fns"
@@ -152,6 +152,35 @@ export const competitionLeaderboard = async (
                     personalRank: personalLeaderboard,
                 })
             )
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const fetchAll = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const { page, limit } = req.query
+    try {
+        if (!req.admin) throw catchError("Unauthorized", 403)
+
+        const [predictions, error] = await tryPromise(
+            new PredictionService({}).findAll(
+                composeFilter(req),
+                Number(page) || 1,
+                Number(limit) || 10,
+                [
+                    { path: "user", select: "email username firstName lastName" },
+                    { path: "match" },
+                ]
+            )
+        )
+
+        if (error) throw catchError("Error retrieving predictions", 400)
+
+        return res.status(200).json(success("Predictions retrieved", predictions))
     } catch (error) {
         next(error)
     }

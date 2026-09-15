@@ -48,18 +48,11 @@ export const Authenticate = async (
 
         let user = decrytData(token)
         const parsedUser = JSON.parse(user) as { _id: string; exp: Date; type: string };
-        const [newUser, error] = await tryPromise(
-            new UserService({ _id: parsedUser._id }).findOne(),
-        )
-
-        if (error) throw catchError("Unathorized", 401);
-        if (!newUser) throw catchError("Unathorized", 401);
 
         if (isAfter(new Date(), new Date(parsedUser.exp))) {
             throw catchError("Session expired. Please login again")
         }
 
-        req.user = newUser
         if (parsedUser?.type === "admin") {
             const [adminUser, error] = await tryPromise(
                 new AdminService({ _id: parsedUser._id }).findOne()
@@ -73,7 +66,7 @@ export const Authenticate = async (
             const [newUser, error] = await tryPromise(
                 new UserService({ _id: parsedUser._id }).findOne(),
             )
-    
+
             if (error) throw catchError("Unathorized", 401);
             if (!newUser) throw catchError("Unathorized", 401);
 
